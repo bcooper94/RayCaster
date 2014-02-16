@@ -27,7 +27,7 @@ double color_min_max(double const c)
 /* Detect the closest sphere a ray intersects
  *
  * Inputs: ray structure, array of intersected spheres,
- * number of spheres, array of intersection points on sphere,
+ * number of spheres hit, array of intersection points on sphere,
  * eye point structure (source of ray)
  * 
  * Output: sphere structure of first sphere intersected by ray r
