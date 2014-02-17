@@ -18,11 +18,14 @@ struct sphere closest_sphere(struct ray r,
 
 struct color ambient_color(struct sphere s, struct color ambience);
 
+struct point error_translate(struct point p, struct vector v);
+
 struct color cast_ray(struct ray r,
    struct sphere spheres[],
    int num_spheres,
    struct point eye,
-   struct color color);
+   struct color color,
+   struct light light);
 
 void cast_all_rays(double min_x, double max_x,
    double min_y, double max_y,

@@ -236,6 +236,11 @@ void ambient_color_test_cases(void)
    checkit_double(newCol6.g, 0.3);
    checkit_double(newCol6.b, 0.0);
 }
+
+void point error_translate_test_cases(void)
+{
+
+}
  
 int main(int argc, char **argv)
 {

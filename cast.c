@@ -6,6 +6,7 @@
  
 #include "cast.h"
 
+#define INTERSECT_ERROR 0.01
 
 // cap the upper and lower values of each color
 double color_min_max(double const c)
@@ -31,7 +32,7 @@ double color_min_max(double const c)
  * eye point structure (source of ray)
  * 
  * Output: sphere structure of first sphere intersected by ray r
-*/
+ */
 struct sphere closest_sphere(struct ray r,
    struct sphere spheres[],
    int num_spheres,
@@ -64,23 +65,60 @@ struct sphere closest_sphere(struct ray r,
  * Inputs: sphere structure, color structure of the room's ambience
  *
  * Outputs: final color of a sphere
-*/
-struct color ambient_color(struct sphere s, struct color ambience)
+ */
+struct color ambient_color(
+   struct sphere s,
+   struct color ambience,
+   struct light light)
 {
    struct color newColor;
 
-   newColor = create_color(s.color.r * s.finish.ambient * ambience.r,
-                           s.color.g * s.finish.ambient * ambience.g,
-                           s.color.b * s.finish.ambient * ambience.b);
+   newColor = create_color(s.color.r * s.finish.ambient * ambience.r + light.color.r,
+                           s.color.g * s.finish.ambient * ambience.g + light.color.r,
+                           s.color.b * s.finish.ambient * ambience.b + light.color.r);
 
    return newColor;
 }
+
+/* Normalize and translate an intersection point along the sphere's
+ * normal vector by 0.01 to prevent unintended intersections
+ */
+struct point error_translate(struct point p, struct vector v)
+{
+   return translate_point(p,
+            scale_vector(normalize_vector(v), INTERSECT_ERROR));
+}
+
+/* Determine in light is visible
+ * Inputs: Sphere structure, intersection point on sphere,
+ * vector normal to sphere, light structure
+ */
+int light_visible(struct sphere s, struct point intersect_point, struct vector normal, struct light light)
+{
+   struct vector norm_to_light;
+   double dotP;
+   int visible_or_not = 0;
+
+   norm_to_light = normalize_vector(vector_from_to(
+                                    error_translate(intersect_point, normal),
+                                    light.p));
+   dotP = dot_vector(norm_to_light);
+
+   if (dotP > 0)
+   {
+      visible_or_not = 1;
+   }
+   
+   return visible_or_not;
+}
+
 
 struct color cast_ray(struct ray r,
    struct sphere spheres[],
    int num_spheres,
    struct point eye,
-   struct color color)
+   struct color color,
+   struct light light)
 {
    struct sphere hit_spheres[num_spheres];
    struct point intersection_points[num_spheres];
