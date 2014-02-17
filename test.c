@@ -124,13 +124,13 @@ void closest_sphere_test_cases(void)
    ray0 = create_ray(create_point(0.0, -5.0, 0.0), create_vector(0.0, 1.2, 0.0));
    ray1 = create_ray(create_point(8.0, 1.0, 0.0), create_vector(0.0, -1.0, 0.0));
    ray2 = create_ray(create_point(0.0, 7.0, 0.0), create_vector(0.0, -1.0, 0.0));
-   ray3 = create_ray(create_point(-9.0, 0.0, 0.0), create_vector(2.0, 0.0, 0.0));
+   ray3 = create_ray(create_point(-9.0, -1.0, 0.0), create_vector(2.0, 0.0, 0.0));
 
    spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0),
-                  1.0,
+                  2.0,
                   create_color(0.35, 0.0, 0.0),
                   create_finish(AMBIENCE_1));
-   spheres[1] = create_sphere(create_point(4.0, 1.0, 0.0),
+   spheres[1] = create_sphere(create_point(4.0, 5.0, 0.0),
                   2.0,
                   create_color(0.0, 0.2, 0.0),
                   create_finish(AMBIENCE_2));
@@ -163,7 +163,7 @@ void closest_sphere_test_cases(void)
                num_spheres,
                intersection_points2,
                ray2.p);
-   sphere3 = closest_sphere(ray2,
+   sphere3 = closest_sphere(ray3,
                hit_spheres3,
                num_spheres,
                intersection_points3,
@@ -172,14 +172,14 @@ void closest_sphere_test_cases(void)
    checkit_double(sphere0.center.x, 0.0);
    checkit_double(sphere0.center.y, 0.0);
    checkit_double(sphere0.center.z, 0.0);
-   checkit_double(sphere1.center.x, 0.0);
-   checkit_double(sphere1.center.y, 4.0);
+   checkit_double(sphere1.center.x, 4.0);
+   checkit_double(sphere1.center.y, 1.0);
    checkit_double(sphere1.center.z, 0.0);
-   checkit_double(sphere2.center.x, -4.0);
-   checkit_double(sphere2.center.y, -1.0);
+   checkit_double(sphere2.center.x, 0.0);
+   checkit_double(sphere2.center.y, 4.0);
    checkit_double(sphere2.center.z, 0.0);
-   checkit_double(sphere3.center.x, 0.0);
-   checkit_double(sphere3.center.y, 4.0);
+   checkit_double(sphere3.center.x, -4.0);
+   checkit_double(sphere3.center.y, -1.0);
    checkit_double(sphere3.center.z, 0.0);
 }
 

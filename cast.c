@@ -39,14 +39,15 @@ struct sphere closest_sphere(struct ray r,
    struct point eye)
 {
    int index;
-   double shortest_distance, current_distance;
-   struct sphere nearest_sphere;
+   double current_distance;
+   struct sphere nearest_sphere = spheres[0];
+   double shortest_distance = length_vector(vector_from_to(
+                                 eye, intersection_points[0]));
 
    for (index = 0; index < num_spheres; ++index)
    {
       current_distance = length_vector(vector_from_to(
                            eye, intersection_points[index]));
-      nearest_sphere = spheres[index];
 
       if (current_distance < shortest_distance)
       {
