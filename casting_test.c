@@ -16,19 +16,24 @@
 #define BLUE_AMBIENCE 0.2
 #define RED_AMBIENCE 0.4
 #define WHITE_AMBIENCE create_color(1.0, 1.0, 1.0)
+#define DIFFUSE 0.4
  
 void cast_all_rays_test_case(void)
 {
    struct point eye;
    struct sphere spheres[NUM_SPHERES];
+   struct light light_point;
    
    eye = create_point(0.0, 0.0, -14.0);
    spheres[0] = create_sphere(create_point(1.0, 1.0, 0.0), 2.0,
                create_color(0.0, 0.0, 1.0),
-               create_finish(BLUE_AMBIENCE));
+               create_finish(BLUE_AMBIENCE, DIFFUSE));
    spheres[1] = create_sphere(create_point(0.5, 1.5, -3.0), 0.5,
                create_color(1.0, 0.0, 0.0),
-               create_finish(RED_AMBIENCE));
+               create_finish(RED_AMBIENCE, DIFFUSE));
+
+   light_point = create_light(create_point(-100.0, 100.0, -100.0),
+                              create_color(1.5, 1.5, 1.5));
    
    cast_all_rays(MIN_X, MAX_X,
       MIN_Y, MAX_Y,
@@ -36,7 +41,8 @@ void cast_all_rays_test_case(void)
       eye,
       spheres,
       NUM_SPHERES,
-      WHITE_AMBIENCE);
+      WHITE_AMBIENCE,
+      light_point);
 }
  
 int main(int argc, char **argv)

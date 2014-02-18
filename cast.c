@@ -69,13 +69,27 @@ struct sphere closest_sphere(struct ray r,
 struct color ambient_color(
    struct sphere s,
    struct color ambience,
-   struct light light)
+   struct light light,
+   int light_not_blocked,
+   double light_visibility)
 {
    struct color newColor;
 
-   newColor = create_color(s.color.r * s.finish.ambient * ambience.r + light.color.r,
-                           s.color.g * s.finish.ambient * ambience.g + light.color.r,
-                           s.color.b * s.finish.ambient * ambience.b + light.color.r);
+   if (light_not_blocked > 0)
+   {
+   newColor = create_color(s.color.r * s.finish.ambient * ambience.r +
+                           light_visibility * light.color.r * s.finish.diffuse,
+                           s.color.g * s.finish.ambient * ambience.g +
+                           light_visibility * light.color.g * s.finish.diffuse,
+                           s.color.b * s.finish.ambient * ambience.b +
+                           light_visibility * light.color.b * s.finish.diffuse);
+   }
+   else
+   {
+      newColor = create_color(s.color.r * s.finish.ambient * ambience.r,
+                           s.color.g * s.finish.ambient * ambience.g,
+                           s.color.b * s.finish.ambient * ambience.b);
+   }
 
    return newColor;
 }
@@ -83,35 +97,59 @@ struct color ambient_color(
 /* Normalize and translate an intersection point along the sphere's
  * normal vector by 0.01 to prevent unintended intersections
  */
-struct point error_translate(struct point p, struct vector v)
+struct point error_translate(struct point intersection_point,
+   struct sphere s)
 {
-   return translate_point(p,
-            scale_vector(normalize_vector(v), INTERSECT_ERROR));
+   return translate_point(intersection_point,
+                          scale_vector(
+                              sphere_normal_at_point(s, intersection_point),
+                              INTERSECT_ERROR));
 }
 
-/* Determine in light is visible
- * Inputs: Sphere structure, intersection point on sphere,
- * vector normal to sphere, light structure
+// Compute normalized vector from an intersection point to a light
+struct vector light_vector(
+   struct sphere s,
+   struct point intersection_point,
+   struct light diffuse)
+{
+   struct point translated_point;
+
+   translated_point = error_translate(intersection_point, s);
+
+   return normalize_vector(vector_from_to(translated_point, diffuse.p));
+}
+
+/* Determine if a sphere is in the way of the light
+ * reflecting off another sphere
+ *
+ * Inputs: point of intersection on sphere,
+ *    normal vector from sphere intersection point,
+ *    normalized vector from light source, light structure,
+ *    spheres array
+ *
+ * Outputs: int representing whether a sphere is blocking
+ *    light source or not
  */
-int light_visible(struct sphere s, struct point intersect_point, struct vector normal, struct light light)
+int sphere_blocking_light(
+   struct point intersected_point,
+   struct light light,
+   struct vector sphere_normal,
+   struct vector light_normal,
+   struct sphere spheres[],
+   int num_spheres)
 {
-   struct vector norm_to_light;
-   double dotP;
-   int visible_or_not = 0;
+   struct ray to_lightsource;
+   struct sphere light_hit_spheres[num_spheres];
+   struct point light_intersect_points[num_spheres];
 
-   norm_to_light = normalize_vector(vector_from_to(
-                                    error_translate(intersect_point, normal),
-                                    light.p));
-   dotP = dot_vector(norm_to_light);
+   to_lightsource = create_ray(intersected_point, light_normal);
 
-   if (dotP > 0)
-   {
-      visible_or_not = 1;
-   }
-   
-   return visible_or_not;
+   return find_intersection_points(spheres,
+                           num_spheres,
+                           to_lightsource,
+                           light_hit_spheres,
+                           light_intersect_points);
 }
-
 
 struct color cast_ray(struct ray r,
    struct sphere spheres[],
@@ -123,7 +161,12 @@ struct color cast_ray(struct ray r,
    struct sphere hit_spheres[num_spheres];
    struct point intersection_points[num_spheres];
    struct sphere close_sphere;
+   struct point sphere_point;
+   struct point sphere_error_point;
    int num_spheres_hit;
+   double light_visibility, light_not_blocked;
+   struct vector sphere_normal;
+   struct vector light_normal;
    struct color sphere_color = create_color(1.0, 1.0, 1.0);
    
    num_spheres_hit = find_intersection_points(
@@ -140,7 +183,31 @@ struct color cast_ray(struct ray r,
                         num_spheres_hit,
                         intersection_points,
                         eye);
-      sphere_color = ambient_color(close_sphere, color);
+      sphere_point = sphere_intersection_point(r, close_sphere).p;
+      sphere_error_point = error_translate(sphere_point, close_sphere);
+      sphere_normal = sphere_normal_at_point(close_sphere, sphere_point);
+      light_normal = light_vector(
+                        close_sphere,
+                        sphere_point,
+                        light);
+      light_visibility = dot_vector(light_vector(
+                           close_sphere,
+                           sphere_point,
+                           light), sphere_normal);
+      light_not_blocked = sphere_blocking_light(
+                           sphere_error_point,
+                           light,
+                           sphere_normal,
+                           light_normal,
+                           spheres,
+                           num_spheres);
+
+         sphere_color = ambient_color(
+                           close_sphere,
+                           color,
+                           light,
+                           light_not_blocked,
+                           light_visibility);
    }
 
    return sphere_color;
@@ -152,7 +219,8 @@ void cast_all_rays(double min_x, double max_x,
    struct point eye,
    struct sphere spheres[],
    int num_spheres,
-   struct color col)
+   struct color col,
+   struct light light)
 {
    struct ray r;
    struct point p;
@@ -175,7 +243,7 @@ void cast_all_rays(double min_x, double max_x,
            v = vector_from_to(eye, p);
            r = create_ray(p, v);
            
-           color = cast_ray(r, spheres, num_spheres, eye, col);
+           color = cast_ray(r, spheres, num_spheres, eye, col, light);
 
            printf("%d %d %d ", (int) (color_min_max(color.r) * 255),
                                (int) (color_min_max(color.g) * 255),

@@ -10,6 +10,7 @@
 #define AMBIENCE_1 0.3
 #define AMBIENCE_2 0.5
 #define AMBIENCE_3 1.0
+#define INTERSECT_ERROR 0.01
 
 void cast_ray_test_cases(void)
 {
@@ -239,7 +240,31 @@ void ambient_color_test_cases(void)
 
 void point error_translate_test_cases(void)
 {
+   struct point intersection1, intersection2;
+   struct sphere s1, s2;
+   struct point translated1, translated2;
 
+   intersection1 = create_point(2.0, 0.0, 0.0);
+   intersection2 = create_point(0.0, -3.0, 0.0);
+
+   s1 = create_sphere(
+         create_point(0.0, 0.0, 0.0), 2.0,
+         create_color(1.0, 0.5, 0.25),
+         create_finish(0.2));
+   s2 = create_sphere(
+         create_point(0.0, 1.0, 0.0), 4.0,
+         create_color(0.0, 0.2, 0.21),
+         create_finish(0.3));
+
+   translated1 = error_translate(intersection1, s1);
+   translated2 = error_translate(intersection2, s2);
+
+   checkit_double(translated1.p.x, 2.01);
+   checkit_double(translated1.p.y, 0.0);
+   checkit_double(translated1.p.z, 0.0);
+   checkit_double(translated2.p.x, 0.0);
+   checkit_double(translated2.p.y, -3.01);
+   checkit_double(translated2.p.z, 0.0);
 }
  
 int main(int argc, char **argv)
@@ -248,6 +273,7 @@ int main(int argc, char **argv)
    color_min_max_test_cases();
    closest_sphere_test_cases();
    ambient_color_test_cases();
+   point error_translate_test_cases();
  
    return 0;
 }
