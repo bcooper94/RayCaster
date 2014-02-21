@@ -73,25 +73,20 @@ struct color ambient_color(
    int light_not_blocked,
    double light_visibility)
 {
-   struct color newColor;
+   double r, g, b;
 
-   if (light_not_blocked > 0)
+   r = s.color.r * s.finish.ambient * ambience.r;
+   g = s.color.g * s.finish.ambient * ambience.g;
+   b = s.color.b * s.finish.ambient * ambience.b;
+
+   if (light_not_blocked > 0 && light_visibility)
    {
-   newColor = create_color(s.color.r * s.finish.ambient * ambience.r +
-                           light_visibility * light.color.r * s.finish.diffuse,
-                           s.color.g * s.finish.ambient * ambience.g +
-                           light_visibility * light.color.g * s.finish.diffuse,
-                           s.color.b * s.finish.ambient * ambience.b +
-                           light_visibility * light.color.b * s.finish.diffuse);
-   }
-   else
-   {
-      newColor = create_color(s.color.r * s.finish.ambient * ambience.r,
-                           s.color.g * s.finish.ambient * ambience.g,
-                           s.color.b * s.finish.ambient * ambience.b);
+      r += light_visibility * light.color.r * s.finish.diffuse * s.color.r;
+      g += light_visibility * light.color.g * s.finish.diffuse * s.color.g;
+      b += light_visibility * light.color.b * s.finish.diffuse * s.color.b;
    }
 
-   return newColor;
+   return create_color(r, g, b);
 }
 
 /* Normalize and translate an intersection point along the sphere's
@@ -112,11 +107,12 @@ struct vector light_vector(
    struct point intersection_point,
    struct light diffuse)
 {
-   struct point translated_point;
+   /*struct point translated_point;
 
    translated_point = error_translate(intersection_point, s);
+ */
 
-   return normalize_vector(vector_from_to(translated_point, diffuse.p));
+   return normalize_vector(vector_from_to(intersection_point, diffuse.p));
 }
 
 /* Determine if a sphere is in the way of the light
@@ -187,9 +183,9 @@ struct color cast_ray(struct ray r,
       sphere_error_point = error_translate(sphere_point, close_sphere);
       sphere_normal = sphere_normal_at_point(close_sphere, sphere_point);
       light_normal = light_vector(
-                        close_sphere,
-                        sphere_point,
-                        light);
+                           close_sphere,
+                           sphere_point,
+                           light);
       light_visibility = dot_vector(light_vector(
                            close_sphere,
                            sphere_point,
@@ -202,7 +198,7 @@ struct color cast_ray(struct ray r,
                            spheres,
                            num_spheres);
 
-         sphere_color = ambient_color(
+      sphere_color = ambient_color(
                            close_sphere,
                            color,
                            light,

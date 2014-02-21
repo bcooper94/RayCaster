@@ -10,6 +10,8 @@
 #define AMBIENCE_1 0.3
 #define AMBIENCE_2 0.5
 #define AMBIENCE_3 1.0
+#define DIFFUSE_1 0.5
+#define DIFFUSE_2 0.2
 #define INTERSECT_ERROR 0.01
 
 void cast_ray_test_cases(void)
@@ -19,9 +21,15 @@ void cast_ray_test_cases(void)
    struct color cast_rays1, cast_rays2, cast_rays3,
             cast_rays4, cast_rays5, cast_rays6,
             cast_rays7, cast_rays8;
+   struct light light1, light2;
    struct color ambient_color = create_color(1.0, 1.0, 1.0);
    int num_spheres1 = 4;
    int num_spheres2 = 3;
+
+   light1 = create_light(create_point(-100.0, 100.0, -100.0),
+               create_color(0.5, 1.0, 1.5));
+   light2 = create_light(create_point(-50.0, 500.0, -100.0),
+               create_color(0.2, 1.1, 0.6));
    
    ray1 = create_ray(create_point(-10.0, 3.0, 0.0), create_vector(1.0, 0.0, 0.0));
    ray2 = create_ray(create_point(10.0, 13.0, 25.0), create_vector(1.0, -1.0, 41.0));
@@ -34,41 +42,41 @@ void cast_ray_test_cases(void)
    spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   4.0,
                   create_color(0.65, 0.0, 0.0),
-                  create_finish(AMBIENCE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1));
    spheres[1] = create_sphere(create_point(-3.0, 4.0, 7.0),
                   1.5,
                   create_color(0.0, 0.7, 0.0),
-                  create_finish(AMBIENCE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2));
    spheres[2] = create_sphere(create_point(1.0, 2.0, 3.0),
                   2.0,
                   create_color(0.0, 0.5, 0.0),
-                  create_finish(AMBIENCE_3));
+                  create_finish(AMBIENCE_3, DIFFUSE_1));
    spheres[3] = create_sphere(create_point(-25.0, 0.0, 0.0),
                   3.0,
                   create_color(0.0, 0.0, 0.35),
-                  create_finish(AMBIENCE_3));
+                  create_finish(AMBIENCE_3, DIFFUSE_2));
    spheres2[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   4.0,
                   create_color(0.55, 0.0, 0.0),
-                  create_finish(AMBIENCE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1));
    spheres2[1] = create_sphere(create_point(4.0, 0.0, 0.0),
                   2.0,
                   create_color(0.0, 0.6, 0.0),
-                  create_finish(AMBIENCE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2));
    spheres2[2] = create_sphere(create_point(-3.0, 0.0, 0.0),
                   4.0,
                   create_color(0.0, 0.25, 0.0),
-                  create_finish(AMBIENCE_3));
+                  create_finish(AMBIENCE_3, DIFFUSE_1));
    
    
-   cast_rays1 = cast_ray(ray1, spheres, num_spheres1, ray1.p, ambient_color);
-   cast_rays2 = cast_ray(ray2, spheres, num_spheres1, ray2.p, ambient_color);
-   cast_rays3 = cast_ray(ray3, spheres, num_spheres1, ray3.p, ambient_color);
-   cast_rays4 = cast_ray(ray4, spheres, num_spheres1, ray4.p, ambient_color);
-   cast_rays5 = cast_ray(ray3, spheres2, num_spheres2, ray3.p, ambient_color);
-   cast_rays6 = cast_ray(ray5, spheres2, num_spheres2, ray5.p, ambient_color);
-   cast_rays7 = cast_ray(ray6, spheres2, num_spheres2, ray6.p, ambient_color);
-   cast_rays8 = cast_ray(ray7, spheres2, num_spheres2, ray7.p, ambient_color);
+   cast_rays1 = cast_ray(ray1, spheres, num_spheres1, ray1.p, ambient_color, light1);
+   cast_rays2 = cast_ray(ray2, spheres, num_spheres1, ray2.p, ambient_color, light1);
+   cast_rays3 = cast_ray(ray3, spheres, num_spheres1, ray3.p, ambient_color, light2);
+   cast_rays4 = cast_ray(ray4, spheres, num_spheres1, ray4.p, ambient_color, light2);
+   cast_rays5 = cast_ray(ray3, spheres2, num_spheres2, ray3.p, ambient_color, light1);
+   cast_rays6 = cast_ray(ray5, spheres2, num_spheres2, ray5.p, ambient_color, light1);
+   cast_rays7 = cast_ray(ray6, spheres2, num_spheres2, ray6.p, ambient_color, light2);
+   cast_rays8 = cast_ray(ray7, spheres2, num_spheres2, ray7.p, ambient_color, light2);
    
    checkit_double(cast_rays1.r, 0.65 * AMBIENCE_1);
    checkit_double(cast_rays1.g, 0.0);
@@ -130,19 +138,19 @@ void closest_sphere_test_cases(void)
    spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   2.0,
                   create_color(0.35, 0.0, 0.0),
-                  create_finish(AMBIENCE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1));
    spheres[1] = create_sphere(create_point(4.0, 5.0, 0.0),
                   2.0,
                   create_color(0.0, 0.2, 0.0),
-                  create_finish(AMBIENCE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2));
    spheres[2] = create_sphere(create_point(0.0, 4.0, 0.0),
                   1.0,
                   create_color(0.0, 0.1, 0.0),
-                  create_finish(AMBIENCE_3));
+                  create_finish(AMBIENCE_3, DIFFUSE_1));
    spheres[3] = create_sphere(create_point(-4.0, -1.0, 0.0),
                   2.0,
                   create_color(0.0, 0.0, 0.5),
-                  create_finish(AMBIENCE_3));
+                  create_finish(AMBIENCE_3, DIFFUSE_2));
 
    find_intersection_points(spheres, num_spheres, ray0, hit_spheres0, intersection_points0);
    find_intersection_points(spheres, num_spheres, ray1, hit_spheres1, intersection_points1);
@@ -190,55 +198,74 @@ void ambient_color_test_cases(void)
    struct sphere s1, s2, s3;
    struct color ambience1, ambience2;
    struct color newCol1, newCol2, newCol3, newCol4, newCol5, newCol6;
+   struct light light1, light2;
+   int lightBlocked, lightNotBlocked;
+   double lightVisibility1, lightVisibility2, lightVisibility3;
+
+   lightBlocked = 0;
+   lightNotBlocked = 1;
+
+   lightVisibility1 = 0.65;
+   lightVisibility2 = 0.42;
+   lightVisibility3 = 0.1;
+
 
    col1 = create_color(0.0, 1.0, 0.0);
    col2 = create_color(1.0, 0.0, 1.0);
    col3 = create_color(0.5, 0.6, 0.0);
 
+   light1 = create_light(create_point(-100.0, 100.0, -100.0), col1);
+   light2 = create_light(create_point(-100.0, 100.0, -100.0), col2);
+
    s1 = create_sphere(create_point(0.0, 0.0, 0.0),
                      2.0,
                      col1,
-                     create_finish(1.0));
+                     create_finish(1.0, DIFFUSE_1));
    s2 = create_sphere(create_point(1.0, 2.0, 3.0),
                      1.0,
                      col2,
-                     create_finish(0.5));
+                     create_finish(0.5, DIFFUSE_2));
    s3 = create_sphere(create_point(2.0, 4.0, 0.0),
                      2.5,
                      col3,
-                     create_finish(1.0));
+                     create_finish(1.0, DIFFUSE_1));
 
    ambience1 = create_color(1.0, 1.0, 1.0);
    ambience2 = create_color(0.5, 0.5, 0.2);
 
-   newCol1 = ambient_color(s1, ambience1);
-   newCol2 = ambient_color(s2, ambience1);
-   newCol3 = ambient_color(s3, ambience1);
-   newCol4 = ambient_color(s1, ambience2);
-   newCol5 = ambient_color(s2, ambience2);
-   newCol6 = ambient_color(s3, ambience2);
+   newCol1 = ambient_color(s1, ambience1, light1, lightBlocked, lightVisibility1);
+   newCol2 = ambient_color(s2, ambience1, light1, lightNotBlocked, lightVisibility2);
+   newCol3 = ambient_color(s3, ambience1, light1, lightBlocked, lightVisibility3);
+   newCol4 = ambient_color(s1, ambience2, light2, lightNotBlocked, lightVisibility1);
+   newCol5 = ambient_color(s2, ambience2, light2, lightBlocked, lightVisibility2);
+   newCol6 = ambient_color(s3, ambience2, light2, lightNotBlocked, lightVisibility3);
 
    checkit_double(newCol1.r, 0.0);
-   checkit_double(newCol1.g, 1.0);
+   checkit_double(newCol1.g, s1.color.g * ambience1.g * s1.finish.ambient);
    checkit_double(newCol1.b, 0.0);
-   checkit_double(newCol2.r, 0.5);
+   checkit_double(newCol2.r, s2.color.r * ambience1.r * s2.finish.ambient
+      + s2.finish.diffuse * s2.color.r * light1.color.r * lightVisibility2);
    checkit_double(newCol2.g, 0.0);
-   checkit_double(newCol2.b, 0.5);
-   checkit_double(newCol3.r, 0.5);
-   checkit_double(newCol3.g, 0.6);
+   checkit_double(newCol2.b, s2.color.b * ambience1.b * s2.finish.ambient
+      + s2.finish.diffuse * s2.color.b * light1.color.b * lightVisibility2);
+   checkit_double(newCol3.r, s3.color.r * ambience1.r * s3.finish.ambient);
+   checkit_double(newCol3.g, s3.color.g * ambience1.g * s3.finish.ambient);
    checkit_double(newCol3.b, 0.0);
    checkit_double(newCol4.r, 0.0);
-   checkit_double(newCol4.g, 0.5);
+   checkit_double(newCol4.g, s1.color.g * ambience2.g * s1.finish.ambient
+      + s3.finish.diffuse * s3.color.g * light2.color.g * lightVisibility1);
    checkit_double(newCol4.b, 0.0);
-   checkit_double(newCol5.r, 0.25);
+   checkit_double(newCol5.r, s2.color.r * ambience2.r * s2.finish.ambient);
    checkit_double(newCol5.g, 0.0);
-   checkit_double(newCol5.b, 0.1);
-   checkit_double(newCol6.r, 0.25);
-   checkit_double(newCol6.g, 0.3);
+   checkit_double(newCol5.b, s2.color.b * ambience2.b * s2.finish.ambient);
+   checkit_double(newCol6.r, s3.color.r * ambience2.r * s3.finish.ambient
+      + s3.finish.diffuse * s3.color.r * light2.color.r * lightVisibility3);
+   checkit_double(newCol6.g, s3.color.g * ambience2.g * s3.finish.ambient
+      + s3.finish.diffuse * s3.color.g * light2.color.g * lightVisibility3);
    checkit_double(newCol6.b, 0.0);
 }
 
-void point error_translate_test_cases(void)
+void error_translate_test_cases(void)
 {
    struct point intersection1, intersection2;
    struct sphere s1, s2;
@@ -250,21 +277,21 @@ void point error_translate_test_cases(void)
    s1 = create_sphere(
          create_point(0.0, 0.0, 0.0), 2.0,
          create_color(1.0, 0.5, 0.25),
-         create_finish(0.2));
+         create_finish(0.2, DIFFUSE_1));
    s2 = create_sphere(
          create_point(0.0, 1.0, 0.0), 4.0,
          create_color(0.0, 0.2, 0.21),
-         create_finish(0.3));
+         create_finish(0.3, DIFFUSE_2));
 
    translated1 = error_translate(intersection1, s1);
    translated2 = error_translate(intersection2, s2);
 
-   checkit_double(translated1.p.x, 2.01);
-   checkit_double(translated1.p.y, 0.0);
-   checkit_double(translated1.p.z, 0.0);
-   checkit_double(translated2.p.x, 0.0);
-   checkit_double(translated2.p.y, -3.01);
-   checkit_double(translated2.p.z, 0.0);
+   checkit_double(translated1.x, 2.01);
+   checkit_double(translated1.y, 0.0);
+   checkit_double(translated1.z, 0.0);
+   checkit_double(translated2.x, 0.0);
+   checkit_double(translated2.y, -3.01);
+   checkit_double(translated2.z, 0.0);
 }
  
 int main(int argc, char **argv)
@@ -273,7 +300,7 @@ int main(int argc, char **argv)
    color_min_max_test_cases();
    closest_sphere_test_cases();
    ambient_color_test_cases();
-   point error_translate_test_cases();
+   error_translate_test_cases();
  
    return 0;
 }
