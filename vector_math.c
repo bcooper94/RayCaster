@@ -43,5 +43,5 @@ struct point translate_point(struct point p, struct vector v)
 
 struct vector vector_from_to(struct point from, struct point to)
 {
-   return difference_point(from, to);
+   return difference_point(to, from);
 }

@@ -181,8 +181,8 @@ void closest_sphere_test_cases(void)
    checkit_double(sphere0.center.x, 0.0);
    checkit_double(sphere0.center.y, 0.0);
    checkit_double(sphere0.center.z, 0.0);
-   checkit_double(sphere1.center.x, 4.0);
-   checkit_double(sphere1.center.y, 1.0);
+   checkit_double(sphere1.center.x, 0.0);
+   checkit_double(sphere1.center.y, 4.0);
    checkit_double(sphere1.center.z, 0.0);
    checkit_double(sphere2.center.x, 0.0);
    checkit_double(sphere2.center.y, 4.0);
