@@ -26,7 +26,6 @@ void cast_ray_test_cases(void)
             cast_rays4, cast_rays5, cast_rays6,
             cast_rays7, cast_rays8;
    struct light light1, light2;
-   struct color c1, c2, c3, c4, c5, c6, c7, c8;
    struct color ambient_color = create_color(1.0, 1.0, 1.0);
    int num_spheres1 = 4;
    int num_spheres2 = 3;
@@ -83,28 +82,26 @@ void cast_ray_test_cases(void)
    cast_rays7 = cast_ray(ray6, spheres2, num_spheres2, ambient_color, light2, ray6.p);
    cast_rays8 = cast_ray(ray7, spheres2, num_spheres2, ambient_color, light2, ray7.p);
 
-   c1 = ambient_color(spheres[0], ambient_color, light1, 
-   
-   //checkit_double(cast_rays1.r, spheres[0].color.r * AMBIENCE_1 * spheres[0].finish.ambient + );
+   checkit_double(cast_rays1.r, 0.326123);
    checkit_double(cast_rays1.g, 0.0);
    checkit_double(cast_rays1.b, 0.0);
    checkit_double(cast_rays2.r, 1.0);
    checkit_double(cast_rays2.g, 1.0);
    checkit_double(cast_rays2.b, 1.0);
-   checkit_double(cast_rays3.r, 0.65 * AMBIENCE_1);
-   checkit_double(cast_rays3.g, 0.0);
-   checkit_double(cast_rays3.b, 0.0);
+   checkit_double(cast_rays3.r, 0.319329);
+   checkit_double(cast_rays3.g, 0.33506);
+   checkit_double(cast_rays3.b, 0.18276);
    checkit_double(cast_rays4.r, 1.0);
    checkit_double(cast_rays4.g, 1.0);
    checkit_double(cast_rays4.b, 1.0);
-   checkit_double(cast_rays5.r, 0.55 * AMBIENCE_1);
+   checkit_double(cast_rays5.r, 0.242228);
    checkit_double(cast_rays5.g, 0.0);
    checkit_double(cast_rays5.b, 0.0);
    checkit_double(cast_rays6.r, 0.0);
    checkit_double(cast_rays6.g, 0.6 * AMBIENCE_2);
    checkit_double(cast_rays6.b, 0.0);
    checkit_double(cast_rays7.r, 0.0);
-   checkit_double(cast_rays7.g, 0.25 * AMBIENCE_3);
+   checkit_double(cast_rays7.g, 0.261554);
    checkit_double(cast_rays7.b, 0.0);
    checkit_double(cast_rays8.r, 0.0);
    checkit_double(cast_rays8.g, 0.25 * AMBIENCE_3);
@@ -258,10 +255,10 @@ void ambient_color_test_cases(void)
    checkit_double(newCol3.r, s3.color.r * ambience1.r * s3.finish.ambient);
    checkit_double(newCol3.g, s3.color.g * ambience1.g * s3.finish.ambient);
    checkit_double(newCol3.b, 0.0);
-   checkit_double(newCol4.r, 0.0);
+   checkit_double(newCol4.r, 0.5);
    checkit_double(newCol4.g, s1.color.g * ambience2.g * s1.finish.ambient
       + s3.finish.diffuse * s3.color.g * light2.color.g * lightVisibility1);
-   checkit_double(newCol4.b, 0.0);
+   checkit_double(newCol4.b, 0.5);
    checkit_double(newCol5.r, s2.color.r * ambience2.r * s2.finish.ambient);
    checkit_double(newCol5.g, 0.0);
    checkit_double(newCol5.b, s2.color.b * ambience2.b * s2.finish.ambient);
@@ -300,6 +297,110 @@ void error_translate_test_cases(void)
    checkit_double(translated2.y, -3.01);
    checkit_double(translated2.z, 0.0);
 }
+
+void light_vector_tests(void)
+{
+   struct sphere s1, s2;
+   struct point p1, p2;
+   struct light diffuse;
+   struct vector light_v1, light_v2;
+
+   s1 = create_sphere(create_point(0.0, 0.0, 0.0), 2.0,
+         create_color(0.1, 0.5, 0.9),
+         create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
+   s2 = create_sphere(create_point(0.0, 0.0, 0.0), 4.0,
+         create_color(0.15, 0.54, 0.29),
+         create_finish(AMBIENCE_2, DIFFUSE_2, SPEC, ROUGH));
+
+   p1 = create_point(-2.0, 0.0, 0.0);
+   p2 = create_point(0.0, 4.0, 0.0);
+
+   diffuse = create_light(create_point(0.0, 150.0, 0.0),
+                         create_color(1.5, 1.2, 0.9));
+
+   light_v1 = light_vector(s1, p1, diffuse);
+   light_v2 = light_vector(s2, p2, diffuse);
+
+   checkit_double(light_v1.x, normalize_vector(vector_from_to(p1, diffuse.p)).x);
+   checkit_double(light_v1.y, normalize_vector(vector_from_to(p1, diffuse.p)).y);
+   checkit_double(light_v1.z, normalize_vector(vector_from_to(p1, diffuse.p)).z);
+   checkit_double(light_v2.x, normalize_vector(vector_from_to(p2, diffuse.p)).x);
+   checkit_double(light_v2.y, normalize_vector(vector_from_to(p2, diffuse.p)).y);
+   checkit_double(light_v2.z, normalize_vector(vector_from_to(p2, diffuse.p)).z);
+}
+
+void sphere_blocking_light_tests(void)
+{
+   struct point intersected_p1, intersected_p2;
+   struct light light;
+   struct vector light_norm;
+   struct sphere spheres[2];
+   int s_blocking1, s_blocking2;
+   int num_spheres = 2;
+
+   light = create_light(create_point(0.0, 200.0, 0.0),
+                        create_color(1.0, 0.5, 0.5));
+
+   spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0), 2.0,
+                  create_color(0.1, 0.5, 0.9),
+                  create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
+   spheres[1] = create_sphere(create_point(0.0, -10.0, 0.0), 1.0,
+                  create_color(0.1, 0.5, 0.9),
+                  create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
+
+   intersected_p1 = create_point(0.0, -9.0, 0.0);
+   intersected_p2 = create_point(0.0, 2.0, 0.0);
+
+   light_norm = create_vector(0.0, 1.0, 0.0);
+
+   s_blocking1 = sphere_blocking_light(intersected_p1, light, light_norm, spheres, num_spheres);
+   s_blocking2 = sphere_blocking_light(intersected_p2, light, light_norm, spheres, num_spheres);
+
+   checkit_int(s_blocking1, 1);
+   checkit_int(s_blocking2, 0);
+}
+
+void spec_intensity_tests(void)
+{
+   struct point eye;
+   struct point error_point;
+   struct vector sphere_norm;
+   struct vector light_norm1, light_norm2;
+   double light_visibility;
+   struct vector reflect1, reflect2;
+   double spec1, spec2;
+   struct vector v;
+
+   eye = create_point(-15.0, 0.0, 0.0);
+   error_point = create_point(-1.01, 0.0, 0.0);
+
+   sphere_norm = create_vector(-1.0, 0.0, 0.0);
+
+   light_norm1 = create_vector(1.0, 0.0, 0.0);
+   light_norm2 = create_vector(0.0, 1.0, 0.0);
+
+   light_visibility = 0.5;
+
+   reflect1 = normalize_vector(
+                  difference_vector(
+                     light_norm1,
+                     scale_vector(
+                        sphere_norm,
+                        2 * light_visibility)));
+   reflect2 = normalize_vector(
+                  difference_vector(
+                     light_norm2,
+                     scale_vector(
+                        sphere_norm,
+                        2 * light_visibility)));
+   v = normalize_vector(vector_from_to(eye, error_point));
+
+   spec1 = spec_intensity(eye, error_point, sphere_norm, light_norm1, light_visibility);
+   spec2 = spec_intensity(eye, error_point, sphere_norm, light_norm2, light_visibility);
+
+   checkit_double(spec1, dot_vector(reflect1, v));
+   checkit_double(spec2, dot_vector(reflect2, v));
+}
  
 int main(int argc, char **argv)
 {
@@ -308,6 +409,9 @@ int main(int argc, char **argv)
    closest_sphere_test_cases();
    ambient_color_test_cases();
    error_translate_test_cases();
+   light_vector_tests();
+   sphere_blocking_light_tests();
+   spec_intensity_tests();
  
    return 0;
 }

@@ -27,14 +27,14 @@ struct color ambient_color(
 struct point error_translate(struct point intersection_point,
    struct sphere s);
 
-struct vector light_vector(struct sphere s,
+struct vector light_vector(
+   struct sphere s,
    struct point intersection_point,
    struct light diffuse);
 
 int sphere_blocking_light(
    struct point intersected_point,
    struct light light,
-   struct vector sphere_normal,
    struct vector light_normal,
    struct sphere spheres[],
    int num_spheres);

@@ -130,7 +130,6 @@ struct vector light_vector(
 int sphere_blocking_light(
    struct point intersected_point,
    struct light light,
-   struct vector sphere_normal,
    struct vector light_normal,
    struct sphere spheres[],
    int num_spheres)
@@ -226,7 +225,6 @@ struct color cast_ray(struct ray r,
       light_blocked = sphere_blocking_light(
                            sphere_error_point,
                            light,
-                           sphere_normal,
                            light_normal,
                            spheres,
                            num_spheres);
