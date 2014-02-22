@@ -31,7 +31,7 @@ struct color
 
 struct finish
 {
-   double ambient, diffuse;
+   double ambient, diffuse, specular, roughness;
 };
 
 struct light
@@ -48,7 +48,6 @@ struct sphere
    struct finish finish;
 };
 
-
 struct point create_point(double x, double y, double z);
 
 struct vector create_vector(double x, double y, double z);
@@ -57,7 +56,11 @@ struct ray create_ray(struct point p, struct vector dir);
 
 struct color create_color(double r, double g, double b);
 
-struct finish create_finish(double ambient, double diffuse);
+struct finish create_finish(
+   double ambient,
+   double diffuse,
+   double specular,
+   double roughness);
 
 struct light create_light(struct point p, struct color col);
 

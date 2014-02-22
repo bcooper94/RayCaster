@@ -17,6 +17,8 @@
 #define RED_AMBIENCE 0.4
 #define WHITE_AMBIENCE create_color(1.0, 1.0, 1.0)
 #define DIFFUSE 0.4
+#define SPECULAR 0.5
+#define ROUGH 0.05
  
 void cast_all_rays_test_case(void)
 {
@@ -27,10 +29,10 @@ void cast_all_rays_test_case(void)
    eye = create_point(0.0, 0.0, -14.0);
    spheres[0] = create_sphere(create_point(1.0, 1.0, 0.0), 2.0,
                create_color(0.0, 0.0, 1.0),
-               create_finish(BLUE_AMBIENCE, DIFFUSE));
+               create_finish(BLUE_AMBIENCE, DIFFUSE, SPECULAR, ROUGH));
    spheres[1] = create_sphere(create_point(0.5, 1.5, -3.0), 0.5,
                create_color(1.0, 0.0, 0.0),
-               create_finish(RED_AMBIENCE, DIFFUSE));
+               create_finish(RED_AMBIENCE, DIFFUSE, SPECULAR, ROUGH));
 
    light_point = create_light(create_point(-100.0, 100.0, -100.0),
                               create_color(1.5, 1.5, 1.5));

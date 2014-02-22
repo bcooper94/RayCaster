@@ -5,6 +5,7 @@
  */
  
 #include "cast.h"
+#include <math.h>
 
 #define INTERSECT_ERROR 0.01
 
@@ -62,14 +63,15 @@ struct sphere closest_sphere(struct ray r,
  *
  * Inputs: sphere structure, color structure of the room's ambience
  *
- * Outputs: final color of a sphere
+ * Output: final color of a sphere
  */
 struct color ambient_color(
    struct sphere s,
    struct color ambience,
    struct light light,
    int light_blocked,
-   double light_visibility)
+   double light_visibility,
+   double spec_intensity)
 {
    double r, g, b;
 
@@ -82,6 +84,12 @@ struct color ambient_color(
       r += light_visibility * light.color.r * s.finish.diffuse * s.color.r;
       g += light_visibility * light.color.g * s.finish.diffuse * s.color.g;
       b += light_visibility * light.color.b * s.finish.diffuse * s.color.b;
+   }
+   if (spec_intensity > 0)
+   {
+      r += light.color.r * s.finish.specular * pow(spec_intensity, 1.0 / s.finish.roughness);
+      g += light.color.g * s.finish.specular * pow(spec_intensity, 1.0 / s.finish.roughness);
+      b += light.color.b * s.finish.specular * pow(spec_intensity, 1.0 / s.finish.roughness);
    }
 
    return create_color(r, g, b);
@@ -116,7 +124,7 @@ struct vector light_vector(
  *    normalized vector from light source, light structure,
  *    spheres array
  *
- * Outputs: int representing whether a sphere is blocking
+ * Output: int representing whether a sphere is blocking
  *    light source or not
  */
 int sphere_blocking_light(
@@ -140,12 +148,44 @@ int sphere_blocking_light(
                            light_intersect_points);
 }
 
+/* Compute the specular intensity at a point
+ * Inputs: Eye point, translated error point,
+ *    normal vector from intersect point on sphere,
+ *    normal vector to light source, light visibility factor
+ *
+ * Output: Specular intensity double
+ */
+double spec_intensity(
+   struct point eye,
+   struct point error_point,
+   struct vector sphere_norm,
+   struct vector light_norm,
+   double light_visibility)
+{
+   struct vector reflection;
+   double specular;
+   struct vector view_direction;
+
+   reflection = normalize_vector(
+                  difference_vector(
+                     light_norm,
+                     scale_vector(
+                        sphere_norm,
+                        2 * light_visibility)));
+
+   view_direction = normalize_vector(vector_from_to(eye, error_point));
+
+   specular = dot_vector(reflection, view_direction);
+
+   return specular;
+}
+
 struct color cast_ray(struct ray r,
    struct sphere spheres[],
    int num_spheres,
-   struct point eye,
    struct color color,
-   struct light light)
+   struct light light,
+   struct point eye)
 {
    struct sphere hit_spheres[num_spheres];
    struct point intersection_points[num_spheres];
@@ -153,7 +193,7 @@ struct color cast_ray(struct ray r,
    struct point sphere_point;
    struct point sphere_error_point;
    int num_spheres_hit;
-   double light_visibility, light_blocked;
+   double light_visibility, light_blocked, intensity;
    struct vector sphere_normal;
    struct vector light_normal;
    struct color sphere_color = create_color(1.0, 1.0, 1.0);
@@ -190,13 +230,20 @@ struct color cast_ray(struct ray r,
                            light_normal,
                            spheres,
                            num_spheres);
+      intensity = spec_intensity(
+                     eye,
+                     sphere_error_point,
+                     sphere_normal,
+                     light_normal,
+                     light_visibility);
 
       sphere_color = ambient_color(
                            close_sphere,
                            color,
                            light,
                            light_blocked,
-                           light_visibility);
+                           light_visibility,
+                           intensity);
    }
 
    return sphere_color;
@@ -232,7 +279,7 @@ void cast_all_rays(double min_x, double max_x,
            v = vector_from_to(eye, p);
            r = create_ray(eye, v);
            
-           color = cast_ray(r, spheres, num_spheres, eye, col, light);
+           color = cast_ray(r, spheres, num_spheres, col, light, eye);
 
            printf("%d %d %d ", (int) (color_min_max(color.r) * 255),
                                (int) (color_min_max(color.g) * 255),

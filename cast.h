@@ -21,7 +21,8 @@ struct color ambient_color(
    struct color ambience,
    struct light light,
    int light_not_blocked,
-   double light_visibility);
+   double light_visibility,
+   double spec_intensity);
 
 struct point error_translate(struct point intersection_point,
    struct sphere s);
@@ -38,12 +39,19 @@ int sphere_blocking_light(
    struct sphere spheres[],
    int num_spheres);
 
+double spec_intensity(
+   struct point eye,
+   struct point error_point,
+   struct vector sphere_norm,
+   struct vector light_norm,
+   double light_visibility);
+
 struct color cast_ray(struct ray r,
    struct sphere spheres[],
    int num_spheres,
-   struct point eye,
    struct color color,
-   struct light light);
+   struct light light,
+   struct point eye);
 
 void cast_all_rays(double min_x, double max_x,
    double min_y, double max_y,

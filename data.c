@@ -44,11 +44,17 @@ struct color create_color(double r, double g, double b)
    return myColor;
 }
 
-struct finish create_finish(double ambient, double diffuse)
+struct finish create_finish(
+   double ambient,
+   double diffuse,
+   double specular,
+   double roughness)
 {
    struct finish myFinish;
    myFinish.ambient = ambient;
-   myFinish.diff = diffuse;
+   myFinish.diffuse = diffuse;
+   myFinish.specular = specular;
+   myFinish.roughness = roughness;
 
    return myFinish;
 }
@@ -57,7 +63,7 @@ struct light create_light(struct point p, struct color col)
 {
    struct light myLight;
    myLight.p = p;
-   myLight.color = color;
+   myLight.color = col;
 
    return myLight;
 }

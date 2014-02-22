@@ -4,8 +4,10 @@
  * HW4 - Test Cases
  */
  
- #include "checkit.h"
- #include "cast.h"
+#include "checkit.h"
+#include "cast.h"
+#include <math.h>
+
 
 #define AMBIENCE_1 0.3
 #define AMBIENCE_2 0.5
@@ -13,6 +15,8 @@
 #define DIFFUSE_1 0.5
 #define DIFFUSE_2 0.2
 #define INTERSECT_ERROR 0.01
+#define ROUGH 0.05
+#define SPEC 0.5
 
 void cast_ray_test_cases(void)
 {
@@ -22,6 +26,7 @@ void cast_ray_test_cases(void)
             cast_rays4, cast_rays5, cast_rays6,
             cast_rays7, cast_rays8;
    struct light light1, light2;
+   struct color c1, c2, c3, c4, c5, c6, c7, c8;
    struct color ambient_color = create_color(1.0, 1.0, 1.0);
    int num_spheres1 = 4;
    int num_spheres2 = 3;
@@ -42,43 +47,45 @@ void cast_ray_test_cases(void)
    spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   4.0,
                   create_color(0.65, 0.0, 0.0),
-                  create_finish(AMBIENCE_1, DIFFUSE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
    spheres[1] = create_sphere(create_point(-3.0, 4.0, 7.0),
                   1.5,
                   create_color(0.0, 0.7, 0.0),
-                  create_finish(AMBIENCE_2, DIFFUSE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2, SPEC, ROUGH));
    spheres[2] = create_sphere(create_point(1.0, 2.0, 3.0),
                   2.0,
                   create_color(0.0, 0.5, 0.0),
-                  create_finish(AMBIENCE_3, DIFFUSE_1));
+                  create_finish(AMBIENCE_3, DIFFUSE_1, SPEC, ROUGH));
    spheres[3] = create_sphere(create_point(-25.0, 0.0, 0.0),
                   3.0,
                   create_color(0.0, 0.0, 0.35),
-                  create_finish(AMBIENCE_3, DIFFUSE_2));
+                  create_finish(AMBIENCE_3, DIFFUSE_2, SPEC, ROUGH));
    spheres2[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   4.0,
                   create_color(0.55, 0.0, 0.0),
-                  create_finish(AMBIENCE_1, DIFFUSE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
    spheres2[1] = create_sphere(create_point(4.0, 0.0, 0.0),
                   2.0,
                   create_color(0.0, 0.6, 0.0),
-                  create_finish(AMBIENCE_2, DIFFUSE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2, SPEC, ROUGH));
    spheres2[2] = create_sphere(create_point(-3.0, 0.0, 0.0),
                   4.0,
                   create_color(0.0, 0.25, 0.0),
-                  create_finish(AMBIENCE_3, DIFFUSE_1));
+                  create_finish(AMBIENCE_3, DIFFUSE_1, SPEC, ROUGH));
    
    
-   cast_rays1 = cast_ray(ray1, spheres, num_spheres1, ray1.p, ambient_color, light1);
-   cast_rays2 = cast_ray(ray2, spheres, num_spheres1, ray2.p, ambient_color, light1);
-   cast_rays3 = cast_ray(ray3, spheres, num_spheres1, ray3.p, ambient_color, light2);
-   cast_rays4 = cast_ray(ray4, spheres, num_spheres1, ray4.p, ambient_color, light2);
-   cast_rays5 = cast_ray(ray3, spheres2, num_spheres2, ray3.p, ambient_color, light1);
-   cast_rays6 = cast_ray(ray5, spheres2, num_spheres2, ray5.p, ambient_color, light1);
-   cast_rays7 = cast_ray(ray6, spheres2, num_spheres2, ray6.p, ambient_color, light2);
-   cast_rays8 = cast_ray(ray7, spheres2, num_spheres2, ray7.p, ambient_color, light2);
+   cast_rays1 = cast_ray(ray1, spheres, num_spheres1, ambient_color, light1, ray1.p);
+   cast_rays2 = cast_ray(ray2, spheres, num_spheres1, ambient_color, light1, ray2.p);
+   cast_rays3 = cast_ray(ray3, spheres, num_spheres1, ambient_color, light2, ray3.p);
+   cast_rays4 = cast_ray(ray4, spheres, num_spheres1, ambient_color, light2, ray4.p);
+   cast_rays5 = cast_ray(ray3, spheres2, num_spheres2, ambient_color, light1, ray3.p);
+   cast_rays6 = cast_ray(ray5, spheres2, num_spheres2, ambient_color, light1, ray5.p);
+   cast_rays7 = cast_ray(ray6, spheres2, num_spheres2, ambient_color, light2, ray6.p);
+   cast_rays8 = cast_ray(ray7, spheres2, num_spheres2, ambient_color, light2, ray7.p);
+
+   c1 = ambient_color(spheres[0], ambient_color, light1, 
    
-   checkit_double(cast_rays1.r, 0.65 * AMBIENCE_1);
+   //checkit_double(cast_rays1.r, spheres[0].color.r * AMBIENCE_1 * spheres[0].finish.ambient + );
    checkit_double(cast_rays1.g, 0.0);
    checkit_double(cast_rays1.b, 0.0);
    checkit_double(cast_rays2.r, 1.0);
@@ -138,19 +145,19 @@ void closest_sphere_test_cases(void)
    spheres[0] = create_sphere(create_point(0.0, 0.0, 0.0),
                   2.0,
                   create_color(0.35, 0.0, 0.0),
-                  create_finish(AMBIENCE_1, DIFFUSE_1));
+                  create_finish(AMBIENCE_1, DIFFUSE_1, SPEC, ROUGH));
    spheres[1] = create_sphere(create_point(4.0, 5.0, 0.0),
                   2.0,
                   create_color(0.0, 0.2, 0.0),
-                  create_finish(AMBIENCE_2, DIFFUSE_2));
+                  create_finish(AMBIENCE_2, DIFFUSE_2, SPEC, ROUGH));
    spheres[2] = create_sphere(create_point(0.0, 4.0, 0.0),
                   1.0,
                   create_color(0.0, 0.1, 0.0),
-                  create_finish(AMBIENCE_3, DIFFUSE_1));
+                  create_finish(AMBIENCE_3, DIFFUSE_1, SPEC, ROUGH));
    spheres[3] = create_sphere(create_point(-4.0, -1.0, 0.0),
                   2.0,
                   create_color(0.0, 0.0, 0.5),
-                  create_finish(AMBIENCE_3, DIFFUSE_2));
+                  create_finish(AMBIENCE_3, DIFFUSE_2, SPEC, ROUGH));
 
    find_intersection_points(spheres, num_spheres, ray0, hit_spheres0, intersection_points0);
    find_intersection_points(spheres, num_spheres, ray1, hit_spheres1, intersection_points1);
@@ -220,25 +227,25 @@ void ambient_color_test_cases(void)
    s1 = create_sphere(create_point(0.0, 0.0, 0.0),
                      2.0,
                      col1,
-                     create_finish(1.0, DIFFUSE_1));
+                     create_finish(1.0, DIFFUSE_1, SPEC, ROUGH));
    s2 = create_sphere(create_point(1.0, 2.0, 3.0),
                      1.0,
                      col2,
-                     create_finish(0.5, DIFFUSE_2));
+                     create_finish(0.5, DIFFUSE_2, SPEC, ROUGH));
    s3 = create_sphere(create_point(2.0, 4.0, 0.0),
                      2.5,
                      col3,
-                     create_finish(1.0, DIFFUSE_1));
+                     create_finish(1.0, DIFFUSE_1, SPEC, ROUGH));
 
    ambience1 = create_color(1.0, 1.0, 1.0);
    ambience2 = create_color(0.5, 0.5, 0.2);
 
-   newCol1 = ambient_color(s1, ambience1, light1, lightBlocked, lightVisibility1);
-   newCol2 = ambient_color(s2, ambience1, light1, lightNotBlocked, lightVisibility2);
-   newCol3 = ambient_color(s3, ambience1, light1, lightBlocked, lightVisibility3);
-   newCol4 = ambient_color(s1, ambience2, light2, lightNotBlocked, lightVisibility1);
-   newCol5 = ambient_color(s2, ambience2, light2, lightBlocked, lightVisibility2);
-   newCol6 = ambient_color(s3, ambience2, light2, lightNotBlocked, lightVisibility3);
+   newCol1 = ambient_color(s1, ambience1, light1, lightNotBlocked, lightVisibility1, 0.2);
+   newCol2 = ambient_color(s2, ambience1, light1, lightBlocked, lightVisibility2, 0.4);
+   newCol3 = ambient_color(s3, ambience1, light1, lightNotBlocked, lightVisibility3, 0.5);
+   newCol4 = ambient_color(s1, ambience2, light2, lightBlocked, lightVisibility1, 1.0);
+   newCol5 = ambient_color(s2, ambience2, light2, lightNotBlocked, lightVisibility2, -3.0);
+   newCol6 = ambient_color(s3, ambience2, light2, lightBlocked, lightVisibility3, -1.0);
 
    checkit_double(newCol1.r, 0.0);
    checkit_double(newCol1.g, s1.color.g * ambience1.g * s1.finish.ambient);
@@ -277,11 +284,11 @@ void error_translate_test_cases(void)
    s1 = create_sphere(
          create_point(0.0, 0.0, 0.0), 2.0,
          create_color(1.0, 0.5, 0.25),
-         create_finish(0.2, DIFFUSE_1));
+         create_finish(0.2, DIFFUSE_1, SPEC, ROUGH));
    s2 = create_sphere(
          create_point(0.0, 1.0, 0.0), 4.0,
          create_color(0.0, 0.2, 0.21),
-         create_finish(0.3, DIFFUSE_2));
+         create_finish(0.3, DIFFUSE_2, SPEC, ROUGH));
 
    translated1 = error_translate(intersection1, s1);
    translated2 = error_translate(intersection2, s2);
